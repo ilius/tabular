@@ -227,13 +227,22 @@ def output(data, dformat):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='Parse ASCII tabular data, such as command output')
-    parser.add_argument('filename', default='-', nargs='?',
-                        help='file to parse or - (default) for stdin')
-    parser.add_argument('--skip', type=int, default=0,
-                        help='lines to skip before table header')
+        description="Parse ASCII tabular data, such as command output",
+    )
     parser.add_argument(
-        '--format',
+        "filename",
+        default="-",
+        nargs="?",
+        help="file to parse or - (default) for stdin"
+    )
+    parser.add_argument(
+        "--skip",
+        type=int,
+        default=0,
+        help="lines to skip before table header",
+    )
+    parser.add_argument(
+        "--format",
         default="ini",
         choices=[
             "ini",
@@ -242,10 +251,13 @@ if __name__ == "__main__":
             "jsonol",
             "csv",
         ],
-        help='output data format',
+        help="output data format",
     )
-    parser.add_argument('--debug', action="store_true",
-                        help='show unfriendly tracebacks, not friendly errors')
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="show unfriendly tracebacks, not friendly errors",
+    )
     args = parser.parse_args()
     try:
         data = parse(args.filename, args.skip)
@@ -253,6 +265,7 @@ if __name__ == "__main__":
     except IndexError:
         if args.debug:
             raise
-        else:
-            print("That data does not seem to be tabular, so I am giving up.",
-                  file=sys.stderr)
+        print(
+            "That data does not seem to be tabular, so I am giving up.",
+            file=sys.stderr,
+        )
