@@ -59,9 +59,11 @@ def parse_lines(lines: "Iterable[str]") -> "List[Dict]":
     lines[0] = re.sub(r"(\S):(\S)", r"\1 \2", lines[0])
 
     left_boundaries = [0] + [
-        x.span()[0] + 1 for x in re.finditer(lb_re, lines[0])]
+        x.span()[0] + 1 for x in re.finditer(lb_re, lines[0])
+    ]
     right_boundaries = [
-        x.span()[0] + 1 for x in re.finditer(rb_re, lines[0])]
+        x.span()[0] + 1 for x in re.finditer(rb_re, lines[0])
+    ]
     # Columns might be left-justified, or right-justified
     # Column headers may contain a space, or not
     # So, check each row, and then look at all the left boundaries: if there is
@@ -70,8 +72,12 @@ def parse_lines(lines: "Iterable[str]") -> "List[Dict]":
     # And look at all the right boundaries: if there is a character before the
     #   right boundary and a space after it, then this is probably the actual
     #   end of a right-justified column
-    lb_checked = dict([(lb, []) for lb in left_boundaries])
-    rb_checked = dict([(rb, []) for rb in right_boundaries])
+    lb_checked = {
+    	b: [] for b in left_boundaries
+    }
+    rb_checked = {
+        b: [] for b in right_boundaries
+    }
     for line in lines[1:]:  # skip the headers
         if not line:
             continue
@@ -82,13 +88,15 @@ def parse_lines(lines: "Iterable[str]") -> "List[Dict]":
                 lb_checked[lb].append(False)
             else:
                 lb_checked[lb].append(
-                    line[lb] != divider and line[lb - 1] == divider)
+                    line[lb] != divider and line[lb - 1] == divider
+                )
         for rb in rb_checked:
             if rb > len(line):
                 rb_checked[rb].append(False)
             else:
                 rb_checked[rb].append(
-                    line[rb - 1] != divider and line[rb] == divider)
+                    line[rb - 1] != divider and line[rb] == divider
+                )
     valid_lb = [x[0] for x in lb_checked.items() if all(x[1])]
     valid_rb = [x[0] for x in rb_checked.items() if all(x[1])]
     position = 0
@@ -114,7 +122,10 @@ def parse_lines(lines: "Iterable[str]") -> "List[Dict]":
         if cj == "r":
             try:
                 start_characters = [
-                    line[cs] != divider for line in lines if line.strip()]
+                    line[cs] != divider
+                    for line in lines
+                    if line.strip()
+                ]
             except IndexError:
                 start_characters = [False]
             if all(start_characters):
@@ -122,8 +133,11 @@ def parse_lines(lines: "Iterable[str]") -> "List[Dict]":
                 # so it's probably two columns. Find a place to split it
                 found = False
                 for ncs in range(cs, ce):
-                    is_spaces = [line[ncs] == divider
-                                 for line in lines if line.strip()]
+                    is_spaces = [
+                        line[ncs] == divider
+                        for line in lines
+                        if line.strip()
+                    ]
                     if all(is_spaces):
                         ncolumns.append((cs, ncs, "l"))
                         ncolumns.append((ncs, ce, "r"))
@@ -157,7 +171,11 @@ def parse_lines(lines: "Iterable[str]") -> "List[Dict]":
             else:
                 newkeys.append([this, incr])
                 break
-    newheaders = [h if i == 1 else "{}_{}".format(h, i) for (h, i) in newkeys]
+    newheaders = [
+        h if i == 1
+        else "{}_{}".format(h, i)
+        for (h, i) in newkeys
+    ]
     for bump in list(bumpable):
         idx = newheaders.index(bump)
         newheaders[idx] = "{}_1".format(newheaders[idx])
@@ -168,8 +186,11 @@ def parse_lines(lines: "Iterable[str]") -> "List[Dict]":
             column = line[start:end].strip()
             linedata.append(column)
 
-        valid_linedata = [x for x in zip(newheaders, linedata)
-                          if x[0] and x[1] and not x[0].startswith(divider)]
+        valid_linedata = [
+            x
+            for x in zip(newheaders, linedata)
+            if x[0] and x[1] and not x[0].startswith(divider)
+        ]
         if valid_linedata:
             d = OrderedDict(valid_linedata)
             if "|" in d:
@@ -186,7 +207,7 @@ def output_ini(data: "Iterable[Dict]") -> None:
 
 
 def output_json(data: "Iterable[Dict]") -> None:
-    print(json.dumps(data, indent=2))
+    print(json.dumps(list(data), indent=2))
 
 
 def output_json_array_lines(data: "Iterable[Dict]") -> None:
