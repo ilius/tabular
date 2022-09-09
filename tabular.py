@@ -7,7 +7,11 @@ import json
 from collections import OrderedDict
 
 
-def parse(filename, skip=0, data_from_tests=None):
+def parse(
+	filename: str,
+	skip: int = 0,
+	data_from_tests: "Optional[Iterable[str]]" = None,
+) -> "List[Dict]":
     if data_from_tests:
         lines = data_from_tests
     else:
@@ -32,7 +36,7 @@ def parse(filename, skip=0, data_from_tests=None):
     return parse_lines(lines)
 
 
-def parse_lines(lines):
+def parse_lines(lines: "Iterable[str]") -> "List[Dict]":
     # handle ascii art tables. We remove all lines that are
     # composed of nothing but + and -
     lines = [x for x in lines if x.replace("-", "").replace("+", "").strip()]
@@ -174,28 +178,28 @@ def parse_lines(lines):
     return data
 
 
-def output_ini(data):
+def output_ini(data: "Iterable[Dict]") -> None:
     for row in data:
         for k, v in row.items():
             print("{}={}".format(k, v))
         print()
 
 
-def output_json(data):
+def output_json(data: "Iterable[Dict]") -> None:
     print(json.dumps(data, indent=2))
 
 
-def output_json_array_lines(data):
+def output_json_array_lines(data: "Iterable[Dict]") -> None:
     for row in data:
         print(json.dumps(list(row.values())))
 
 
-def output_json_object_lines(data):
+def output_json_object_lines(data: "Iterable[Dict]") -> None:
     for row in data:
         print(json.dumps(row))
 
 
-def output_csv(data):
+def output_csv(data: "Iterable[Dict]") -> None:
     import csv
     if not data:
         return
@@ -212,7 +216,7 @@ def output_csv(data):
         writer.writerow(row)
 
 
-def output(data, dformat):
+def output(data: "Iterable[Dict]", dformat: str) -> None:
     if dformat == "ini":
         output_ini(data)
     elif dformat == "json":
