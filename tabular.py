@@ -185,11 +185,44 @@ def output_json(data):
     print(json.dumps(data, indent=2))
 
 
+def output_json_array_lines(data):
+    for row in data:
+        print(json.dumps(list(row.values())))
+
+
+def output_json_object_lines(data):
+    for row in data:
+        print(json.dumps(row))
+
+
+def output_csv(data):
+    import csv
+    if not data:
+        return
+    fieldNames = OrderedDict([
+        (key, None)
+        for key in data[0].keys()
+    ])
+    writer = csv.DictWriter(
+        sys.stdout,
+        fieldnames=fieldNames,
+    )
+    writer.writeheader()
+    for row in data:
+        writer.writerow(row)
+
+
 def output(data, dformat):
     if dformat == "ini":
         output_ini(data)
     elif dformat == "json":
         output_json(data)
+    elif dformat == "jsonal":
+        output_json_array_lines(data)
+    elif dformat == "jsonol":
+        output_json_object_lines(data)
+    elif dformat == "csv":
+        output_csv(data)
 
 
 if __name__ == "__main__":
@@ -199,8 +232,18 @@ if __name__ == "__main__":
                         help='file to parse or - (default) for stdin')
     parser.add_argument('--skip', type=int, default=0,
                         help='lines to skip before table header')
-    parser.add_argument('--format', default="ini", choices=["ini", "json"],
-                        help='output data format')
+    parser.add_argument(
+        '--format',
+        default="ini",
+        choices=[
+            "ini",
+            "json",
+            "jsonal",
+            "jsonol",
+            "csv",
+        ],
+        help='output data format',
+    )
     parser.add_argument('--debug', action="store_true",
                         help='show unfriendly tracebacks, not friendly errors')
     args = parser.parse_args()
