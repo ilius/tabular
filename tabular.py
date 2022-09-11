@@ -10,11 +10,9 @@ from collections import OrderedDict
 def parse(
 	filename: str,
 	skip: int = 0,
-	data_from_tests: "Optional[Iterable[str]]" = None,
+	lines: "Optional[Iterable[str]]" = None,
 ) -> "List[Dict]":
-    if data_from_tests:
-        lines = data_from_tests
-    else:
+    if lines is None:
         if filename == "-":
             fp = sys.stdin
         else:
