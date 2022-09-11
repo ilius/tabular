@@ -19,7 +19,8 @@ def parse(
             fp = open(filename, encoding="utf-8")
         lines = fp.readlines()
         fp.close()
-    if skip:
+
+    if skip > 0:
         lines = lines[skip:]
     else:
         # consider dwimming skipping lines
@@ -27,10 +28,11 @@ def parse(
         # and a line with multiple spaces is a column
         # we only dwim one line skip; we could keep looking for single-space
         # lines until we find a proper header line, but since the only
-        # example known so far is netstat, we'll just check the first
+        # example known so far is netstat and ls -l, we'll just check the first
         if len(re.findall(r"\s\s", lines[0])) == 0 and \
            len(re.findall(r"\s\s", lines[1])) > 0:
             lines = lines[1:]
+
     return parse_lines(lines)
 
 
