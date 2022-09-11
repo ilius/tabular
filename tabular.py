@@ -90,13 +90,11 @@ def parse_lines(lines: "Iterable[str]") -> "List[Dict]":
                 lb_checked[lb].append(
                     line[lb] != divider and line[lb - 1] == divider
                 )
-        for rb in rb_checked:
-            if rb > len(line):
-                rb_checked[rb].append(False)
-            else:
-                rb_checked[rb].append(
-                    line[rb - 1] != divider and line[rb] == divider
-                )
+        for rb, values in rb_checked.items():
+            values.append(
+                line[rb - 1] != divider and line[rb] == divider
+                if rb < len(line) else False
+            )
     valid_lb = [x[0] for x in lb_checked.items() if all(x[1])]
     valid_rb = [x[0] for x in rb_checked.items() if all(x[1])]
     position = 0
