@@ -4,11 +4,15 @@ import tabular
 
 
 class TestParser(unittest.TestCase):
-    def check_equality(self, inp, exp, extraskip=0):
+    def check_equality(self, inp, exp, extraskip=0, **kwargs):
         self.maxDiff = None
         lines = inp.split("\n")
         # first line is blank because of formatting
-        res = tabular.parse(filename=None, lines=lines[1 + extraskip:])
+        res = tabular.parse(
+        	filename=None,
+        	lines=lines[1 + extraskip:],
+        	**kwargs
+    	)
         res_as_dict = [dict(x) for x in res]
         return self.assertEqual(res_as_dict, exp)
 
@@ -34,7 +38,7 @@ One     Two    One
             {"One_1": "1.1", "Two": "1.2", "One_2": "1.3"},
             {"One_1": "2.1", "Two": "2.2", "One_2": "2.3"}
         ]
-        self.check_equality(inp, exp)
+        self.check_equality(inp, exp, fix_header_dup=True)
 
     def test_basic_spaces(self):
         inp = """

@@ -8,9 +8,10 @@ from collections import OrderedDict
 
 
 def parse(
-	filename: str,
-	skip: int = 0,
-	lines: "Optional[Iterable[str]]" = None,
+    filename: str,
+    skip: int = 0,
+    lines: "Optional[Iterable[str]]" = None,
+    **kwargs
 ) -> "List[Dict]":
     if lines is None:
         if filename == "-":
@@ -33,10 +34,14 @@ def parse(
            len(re.findall(r"\s\s", lines[1])) > 0:
             lines = lines[1:]
 
-    return parse_lines(lines)
+    return parse_lines(lines, **kwargs)
 
 
-def parse_lines(lines: "Iterable[str]") -> "List[Dict]":
+def parse_lines(
+    lines: "Iterable[str]",
+    fix_header_dup: bool = True,
+    fix_header_colon: bool = False,
+) -> "List[Dict]":
     # handle ascii art tables. We remove all lines that are
     # composed of nothing but + and -
     lines = [x for x in lines if x.replace("-", "").replace("+", "").strip()]
@@ -56,7 +61,8 @@ def parse_lines(lines: "Iterable[str]") -> "List[Dict]":
     #    blah.blah.blah 12345
     # which is basically a right col and a left col with a weird header divider
     # so replace "x:x" with "x x" in headers, where x is a valid character
-    lines[0] = re.sub(r"(\S):(\S)", r"\1 \2", lines[0])
+    if fix_header_colon:
+        lines[0] = re.sub(r"(\S):(\S)", r"\1 \2", lines[0])
 
     left_boundaries = [0] + [
         x.span()[0] + 1 for x in re.finditer(lb_re, lines[0])
@@ -73,7 +79,7 @@ def parse_lines(lines: "Iterable[str]") -> "List[Dict]":
     #   right boundary and a space after it, then this is probably the actual
     #   end of a right-justified column
     lb_checked = {
-    	b: [] for b in left_boundaries
+        b: [] for b in left_boundaries
     }
     rb_checked = {
         b: [] for b in right_boundaries
@@ -169,14 +175,18 @@ def parse_lines(lines: "Iterable[str]") -> "List[Dict]":
             else:
                 newkeys.append([this, incr])
                 break
-    newheaders = [
-        h if i == 1
-        else "{}_{}".format(h, i)
-        for (h, i) in newkeys
-    ]
-    for bump in list(bumpable):
-        idx = newheaders.index(bump)
-        newheaders[idx] = "{}_1".format(newheaders[idx])
+
+    if fix_header_dup:
+        newheaders = [
+            h if i == 1
+            else "{}_{}".format(h, i)
+            for (h, i) in newkeys
+        ]
+        for bump in list(bumpable):
+            idx = newheaders.index(bump)
+            newheaders[idx] = "{}_1".format(newheaders[idx])
+    else:
+        newheaders = [h for (h, i) in newkeys]
 
     for line in lines[1:]:
         linedata = []
